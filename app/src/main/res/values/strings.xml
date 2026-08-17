@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TheWatcher</string>
+
+    <!-- Disclaimer -->
+    <string name="disclaimer_estimate">Estimasi per-device BUKAN byte sesungguhnya (batasan Android non-root). Total hotspot mendekati pasti.</string>
+
+    <!-- Main screen -->
+    <string name="total_session">Total Sesi Ini</string>
+    <string name="total_today">Total Hari Ini</string>
+    <string name="connected_devices">Device Terhubung</string>
+    <string name="no_devices">Belum ada device terhubung.</string>
+    <string name="start_monitoring">Mulai Monitoring</string>
+    <string name="stop_monitoring">Stop Monitoring</string>
+    <string name="history">History</string>
+    <string name="received">Download</string>
+    <string name="transmitted">Upload</string>
+    <string name="mac_address">MAC</string>
+    <string name="ip_address">IP</string>
+    <string name="duration">Durasi</string>
+    <string name="perm_location_rationale">Izin lokasi diperlukan untuk membaca daftar device hotspot (batasan Android).</string>
+    <string name="perm_notif_rationale">Izin notifikasi diperlukan agar monitoring berjalan di latar depan.</string>
+    <string name="grant_permissions">Berikan Izin</string>
+
+    <!-- History -->
+    <string name="history_title">History Sesi Hotspot</string>
+    <string name="history_empty">Belum ada sesi tersimpan.</string>
+    <string name="session_duration">Durasi</string>
+    <string name="session_total">Total</string>
+    <string name="session_devices">Device</string>
+    <string name="session_detail_back">Kembali</string>
+    <string name="device_share">%1$d%%</string>
+    <string name="history_disclaimer">Angka per-device adalah estimasi.</string>
+
+    <!-- Notification -->
+    <string name="notif_channel_name">TheWatcher Monitoring</string>
+    <string name="notif_channel_desc">Notifikasi saat memantau hotspot</string>
+    <string name="notif_title">TheWatcher aktif</string>
+    <string name="notif_text">Memantau pemakaian hotspot…</string>
+</resources>
