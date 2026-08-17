@@ -3,13 +3,10 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <group android:scaleX="2.4"
-        android:scaleY="2.4"
-        android:translateX="34"
-        android:translateY="34">
+    <group android:translateX="30"
+        android:translateY="30">
         <path
             android:fillColor="#FFFFFF"
-            android:pathData="M12,4.5C7,4.5 2.73,7.61 1,12c1.73,4.39 6,7.5 11,7.5s9.27,-3.11 11,-7.5c-1.73,-4.39 -6,-7.5 -11,-7.5zM12,17a5,5 0,0 1,0 -10 5,5 0,0 1,0 10zM12,7a5,5 0,0 0,0 10 5,5 0,0 0,0 -10z" />
-        <circle android:fillColor="#FFFFFF" android:cx="12" android:cy="12" android:r="2.5" />
+            android:pathData="M24,12C13.1,12 4.2,19.2 2,30c2.2,10.8 11.1,18 22,18s19.8,-7.2 22,-18c-2.2,-10.8 -11.1,-18 -22,-18zM24,42c-6.6,0 -12,-5.4 -12,-12s5.4,-12 12,-12 12,5.4 12,12 -5.4,12 -12,12zM24,24c-3.3,0 -6,2.7 -6,6s2.7,6 6,6 6,-2.7 6,-6 -2.7,-6 -6,-6z" />
     </group>
 </vector>
