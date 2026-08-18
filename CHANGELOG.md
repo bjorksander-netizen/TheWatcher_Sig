@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.3
+Perbaikan deteksi device:
+- ClientDetector multi-metode: SoftAp (reflection) → `ip neigh show` → `cat /proc/net/arp` → baca file langsung. Pakai hasil pertama yang tidak kosong.
+- Card diagnostik di UI: saat list kosong, tampilkan alasan (mis. lokasi tidak diizinkan / `ip neigh` blank) supaya mudah debug di HP.
+
 ## v0.2
 Bug fixes:
 - Device list: ARP fallback when SoftAp callback returns empty (API 31+).

@@ -65,6 +65,17 @@ fun MainScreen(
 
         if (state.clients.isEmpty()) {
             Text("Belum ada device terhubung.")
+            if (state.diagnostic.isNotEmpty()) {
+                Text(
+                    "Diagnostik: ${state.diagnostic}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline
+                )
+            }
+            Text(
+                "Tips: pastikan izin Lokasi diberikan & hotspot aktif, lalu device benar-benar terhubung.",
+                style = MaterialTheme.typography.bodySmall
+            )
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(state.clients) { c ->

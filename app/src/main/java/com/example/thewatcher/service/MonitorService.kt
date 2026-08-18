@@ -7,18 +7,14 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
-import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.example.thewatcher.R
 import com.example.thewatcher.data.db.DatabaseProvider
-import com.example.thewatcher.monitor.ArpClientProvider
-import com.example.thewatcher.monitor.ClientProvider
+import com.example.thewatcher.monitor.ClientDetector
 import com.example.thewatcher.monitor.MonitorStateHolder
 import com.example.thewatcher.monitor.PerDeviceSplitter
-import com.example.thewatcher.monitor.SoftApClientProvider
-import com.example.thewatcher.monitor.TetheredEstimator
 import com.example.thewatcher.monitor.TrafficSampler
 import com.example.thewatcher.data.model.ConnectedClient
 import com.example.thewatcher.data.model.DailyTotal
@@ -40,8 +36,7 @@ class MonitorService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.IO)
     private var pollJob: Job? = null
 
-    private lateinit var arpProvider: ClientProvider
-    private var softApProvider: ClientProvider? = null
+    private lateinit var detector: ClientDetector
     private lateinit var trafficSampler: TrafficSampler
     private var currentSessionId: Long = -1L
 
@@ -58,12 +53,8 @@ class MonitorService : Service() {
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
-        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        arpProvider = ArpClientProvider()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            softApProvider = SoftApClientProvider(wifiManager).also { it.register() }
-        }
         trafficSampler = TrafficSampler(applicationContext)
+        detector = ClientDetector(applicationContext)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -111,13 +102,9 @@ class MonitorService : Service() {
     private suspend fun tick() {
         val now = System.currentTimeMillis()
 
-        // Bug fix #1: try SoftAp first, fall back to ARP if empty.
-        val softApClients = if (softApProvider != null) {
-            runCatching { softApProvider!!.getClients() }.getOrDefault(emptyList())
-        } else emptyList()
-        val clients = if (softApClients.isNotEmpty()) softApClients else {
-            runCatching { arpProvider.getClients() }.getOrDefault(emptyList())
-        }
+        // Bug fix #1: try multiple strategies; capture diagnostic for UI.
+        val clients = detector.detect()
+        val diag = detector.getDiagnostic()
 
         val mobileRxNow = trafficSampler.getMobileRxBytes()
         val mobileTxNow = trafficSampler.getMobileTxBytes()
@@ -183,7 +170,8 @@ class MonitorService : Service() {
                 isMonitoring = true,
                 sessionRxBytes = sessionRx,
                 sessionTxBytes = sessionTx,
-                clients = connectedClients
+                clients = connectedClients,
+                diagnostic = diag
             )
         }
     }
@@ -201,8 +189,7 @@ class MonitorService : Service() {
                 )
             }
             pollJob?.cancel()
-            softApProvider?.release()
-            arpProvider.release()
+            detector.release()
         }
         MonitorStateHolder.reset()
         stopForeground(STOP_FOREGROUND_REMOVE)

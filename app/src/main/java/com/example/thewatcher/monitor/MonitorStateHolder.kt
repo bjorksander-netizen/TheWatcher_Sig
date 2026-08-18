@@ -15,6 +15,7 @@ data class MonitorUiState(
     val todayRxBytes: Long = 0L,
     val todayTxBytes: Long = 0L,
     val clients: List<ConnectedClient> = emptyList(),
+    val diagnostic: String = "",
     val error: String? = null
 )
 
