@@ -9,6 +9,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
     steps:
       - name: Checkout
@@ -26,9 +29,13 @@ jobs:
       - name: Accept Android SDK licenses
         run: yes | sdkmanager --licenses || true
 
-      - name: Install build-tools & platform
+      - name: Install build-tools & platform (verify)
         run: |
           sdkmanager "platforms;android-34" "build-tools;34.0.0"
+          echo "=== installed platforms ==="
+          sdkmanager --list_installed | grep -E "platforms|build-tools" || true
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          ls -la "$ANDROID_HOME/platforms/android-34/android.jar"
 
       - name: Set up Gradle (installs Gradle 8.9 into tool-cache)
         uses: gradle/actions/setup-gradle@v3
@@ -37,9 +44,13 @@ jobs:
 
       - name: Run unit tests
         run: gradle :app:testDebugUnitTest --no-daemon
+        env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
 
       - name: Build debug APK
         run: gradle :app:assembleDebug --no-daemon
+        env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
