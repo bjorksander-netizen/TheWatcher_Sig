@@ -37,6 +37,16 @@ jobs:
       - name: Write local.properties with sdk.dir
         run: echo "sdk.dir=$ANDROID_HOME" > local.properties
 
+      - name: DEBUG inspect android.jar API surface
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "=== platform dirs ==="
+          ls "$ANDROID_HOME/platforms" || true
+          echo "=== WifiClient in android.jar? ==="
+          unzip -l "$ANDROID_HOME/platforms/android-34/android.jar" 2>/dev/null | grep -i "WifiClient" || echo "WifiClient NOT FOUND in jar"
+          echo "=== NetworkStats in android.jar? ==="
+          unzip -l "$ANDROID_HOME/platforms/android-34/android.jar" 2>/dev/null | grep -i "NetworkStats" | head || echo "NetworkStats NOT FOUND"
+
       - name: Set up Gradle (installs Gradle 8.9 into tool-cache)
         uses: gradle/actions/setup-gradle@v3
         with:
