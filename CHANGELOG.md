@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.2
+Bug fixes:
+- Device list: ARP fallback when SoftAp callback returns empty (API 31+).
+- Data counter: show delta from monitoring start, not cumulative since boot.
+
 ## v0.1 (MVP, no-root)
 Fitur awal TheWatcher:
 - Daftar device terhubung ke hotspot (SoftAp API31+ / ARP fallback).

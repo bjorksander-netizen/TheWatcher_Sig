@@ -40,7 +40,8 @@ class MonitorService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.IO)
     private var pollJob: Job? = null
 
-    private lateinit var clientProvider: ClientProvider
+    private lateinit var arpProvider: ClientProvider
+    private var softApProvider: ClientProvider? = null
     private lateinit var trafficSampler: TrafficSampler
     private var currentSessionId: Long = -1L
 
@@ -58,10 +59,9 @@ class MonitorService : Service() {
         super.onCreate()
         createNotificationChannel()
         val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        clientProvider = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            SoftApClientProvider(wifiManager).also { it.register() }
-        } else {
-            ArpClientProvider()
+        arpProvider = ArpClientProvider()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            softApProvider = SoftApClientProvider(wifiManager).also { it.register() }
         }
         trafficSampler = TrafficSampler(applicationContext)
     }
@@ -110,20 +110,24 @@ class MonitorService : Service() {
 
     private suspend fun tick() {
         val now = System.currentTimeMillis()
-        val clients = runCatching { clientProvider.getClients() }.getOrDefault(emptyList())
+
+        // Bug fix #1: try SoftAp first, fall back to ARP if empty.
+        val softApClients = if (softApProvider != null) {
+            runCatching { softApProvider!!.getClients() }.getOrDefault(emptyList())
+        } else emptyList()
+        val clients = if (softApClients.isNotEmpty()) softApClients else {
+            runCatching { arpProvider.getClients() }.getOrDefault(emptyList())
+        }
 
         val mobileRxNow = trafficSampler.getMobileRxBytes()
         val mobileTxNow = trafficSampler.getMobileTxBytes()
+
+        // Bug fix #2: use delta from baseline, not raw cumulative total.
         val deltaRx = (mobileRxNow - startMobileRx).coerceAtLeast(0L)
         val deltaTx = (mobileTxNow - startMobileTx).coerceAtLeast(0L)
 
-        // Treat full-mobile delta as tethered (own-usage isolation is best-effort).
-        val tethered = TetheredEstimator.estimateTethered(
-            mobileRxNow, mobileTxNow, 0L, 0L
-        )
-
-        sessionRx = tethered.rxBytes
-        sessionTx = tethered.txBytes
+        sessionRx = deltaRx
+        sessionTx = deltaTx
 
         // Update per-client durations for this interval.
         val interval = (now - lastTickMs).coerceAtLeast(0L)
@@ -197,7 +201,8 @@ class MonitorService : Service() {
                 )
             }
             pollJob?.cancel()
-            clientProvider.release()
+            softApProvider?.release()
+            arpProvider.release()
         }
         MonitorStateHolder.reset()
         stopForeground(STOP_FOREGROUND_REMOVE)
