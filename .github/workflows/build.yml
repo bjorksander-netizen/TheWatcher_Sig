@@ -29,9 +29,13 @@ jobs:
       - name: Accept Android SDK licenses
         run: yes | sdkmanager --licenses || true
 
-      - name: Install build-tools & platform (verify)
+      - name: Install build-tools & FULL platform 34 (replace stub)
         run: |
+          # setup-android ships a stub platform; remove it and install the real one.
+          rm -rf "$ANDROID_HOME/platforms/android-34"
           sdkmanager "platforms;android-34" "build-tools;34.0.0"
+          echo "=== WifiClient in jar after reinstall? ==="
+          unzip -l "$ANDROID_HOME/platforms/android-34/android.jar" 2>/dev/null | grep -i "WifiClient" || echo "STILL MISSING"
           ls -la "$ANDROID_HOME/platforms/android-34/android.jar"
 
       - name: Write local.properties with sdk.dir
